@@ -11,7 +11,7 @@ void init(){
     }
 }
 
-int tokenize(char* p){
+int tokenize(char* p, TokenArray *tokens){
     int best_len = -1;
     TokenType best_match = TOK_UNIDENTIFIED;
     regmatch_t match;
@@ -24,17 +24,23 @@ int tokenize(char* p){
         }
     }else if (isdigit(p[0])){
         detect_pattern_token(1, match, p, &best_len, &best_match);
-    }else{
+    }else if(p[0] == ' '){
+        best_len = -1;
+        best_match = TOK_WHITESPACE;
+    }else if(p[0] == '\n'){
+        best_len = 1;
+        best_match = TOK_NEWLINE;
+    }
+    else{
         detect_literal_token(p, &best_len, operator_defs,operator_defs_len, &best_match);
     }
 
     if (best_len <= 0) return -1;
 
-    char* value = malloc(best_len + 1);
-    memcpy(value,p,best_len);
-    value[best_len] = '\0';
-    printf("TOKEN(TYPE=%s,VALUE='%s')\n",token_type_str(best_match),value);
-    free(value);
+    Token token = {best_match,p,best_len};
+    push(tokens,token);
+    //printf("TOKEN(TYPE=%s,VALUE='%.*s')\n",token_type_str(best_match),best_len,p);
+    //free(value);
 
     return best_len;
 }

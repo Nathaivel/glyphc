@@ -32,13 +32,15 @@ typedef enum {
     TOK_RPARAN,
     TOK_LBRACE,
     TOK_RBRACE,
+    TOK_NEWLINE,
     TOK_UNIDENTIFIED,
     TOK_WHITESPACE,
 }TokenType;
 
 typedef struct Token{
     TokenType token_type;
-    char* value;
+    const char* start;
+    size_t size;
 }Token;
 
 typedef struct TokenDef{
@@ -46,6 +48,12 @@ typedef struct TokenDef{
     char* pattern;
     regex_t re;
 }TokenDef;
+
+typedef struct TokenArray{
+    Token* token_array;
+    int count;
+    int size;
+}TokenArray;
 
 extern TokenDef token_defs[3];
 extern TokenDef keyword_defs[];
@@ -58,6 +66,8 @@ extern int operator_defs_len;
 void detect_pattern_token(int token_def_index,regmatch_t match,char* p,int *match_len,TokenType* best_match);
 void detect_literal_token(char* target,int* best_len,TokenDef* lookup_table,int lookup_len,TokenType* best_match);
 char* token_type_str(TokenType token_type);
-
+void push(TokenArray *token_array,Token new_token);
+void array_init(TokenArray *token_array);
+void print_array(TokenArray *token_array);
 
 #endif

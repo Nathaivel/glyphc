@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -MMD _MP
+CFLAGS = -g -fsanitize=address
 SRC = src/main.c src/token.c src/lexer.c
 OBJS = build/main.o build/token.o build/lexer.o
 EXECUTABLE = glyphc

@@ -119,9 +119,46 @@ char* token_type_str(TokenType token_type){
             return "right brace";
         case TOK_WHITESPACE:
             return "whitespace";
+        case TOK_NEWLINE:
+            return "newline";
         case TOK_UNIDENTIFIED:
             return "unidentified";
         default:
             return "unidentified";
     }
+}
+
+void array_init(TokenArray *array){
+    array->token_array = NULL;
+    array->size = 0;
+    array->count = 0;
+}
+
+void print_array(TokenArray *array){
+    for (int i = 0;i < array->count;i++){
+        Token token = (*array).token_array[i];
+        printf("Token\nType: %s\nValue: %.*s\n\n",token_type_str(token.token_type),token.size,token.start);
+    }
+}
+
+void push(TokenArray *array, Token new_token){
+    if ((*array).token_array == NULL){
+        array->size = 8;
+        array->count = 0;
+        (*array).token_array = malloc(sizeof(Token)*array->size);
+        //printf("Success");
+    }else if (array->count >= array->size){
+        array->size *= 2;
+        Token *tmp = realloc((*array).token_array,sizeof(Token)*array->size);
+
+        if (tmp == NULL){
+            fprintf(stderr, "realloc failed\n");
+            exit(1);
+        }
+
+        (*array).token_array = tmp;
+    }
+
+    (*array).token_array[array->count] = new_token;
+    array->count += 1;
 }
