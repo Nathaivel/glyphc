@@ -36,9 +36,9 @@ TokenDef operator_defs[] = {
     {TOK_OPERATOR_OR, "||"},
 };
 
-#define token_defs_len (sizeof(token_defs)/sizeof(token_defs[0]))
-#define keyword_defs_len (sizeof(keyword_defs)/sizeof(keyword_defs[0]))
-#define operator_defs_len (sizeof(operator_defs)/sizeof(operator_defs[0]))
+int token_defs_len = (sizeof(token_defs)/sizeof(token_defs[0]));
+int keyword_defs_len = (sizeof(keyword_defs)/sizeof(keyword_defs[0]));
+int operator_defs_len = (sizeof(operator_defs)/sizeof(operator_defs[0]));
 
 void detect_pattern_token(int token_def_index,regmatch_t match,char* p,int *match_len,TokenType* best_match){
     if (regexec(&token_defs[token_def_index].re, p, 1, &match, 0) == 0 && match.rm_so == 0){
@@ -124,38 +124,4 @@ char* token_type_str(TokenType token_type){
         default:
             return "unidentified";
     }
-}
-
-void init(){
-    for (int i = 0;i < token_defs_len;i++){
-        regcomp(&(token_defs[i].re),token_defs[i].pattern,REG_EXTENDED);
-    }
-}
-
-int tokenize(char* p){
-    int best_len = -1;
-    TokenType best_match = TOK_UNIDENTIFIED;
-    regmatch_t match;
-
-    if (isalpha(p[0]) || p[0] == '_'){
-        detect_literal_token(p, &best_len,keyword_defs,keyword_defs_len, &best_match);
-
-        if (best_match == TOK_UNIDENTIFIED){
-            detect_pattern_token(0, match, p, &best_len, &best_match);
-        }
-    }else if (isdigit(p[0])){
-        detect_pattern_token(1, match, p, &best_len, &best_match);
-    }else{
-        detect_literal_token(p, &best_len, operator_defs,operator_defs_len, &best_match);
-    }
-
-    if (best_len <= 0) return -1;
-
-    char* value = malloc(best_len + 1);
-    memcpy(value,p,best_len);
-    value[best_len] = '\0';
-    printf("TOKEN(TYPE=%s,VALUE='%s')\n",token_type_str(best_match),value);
-    free(value);
-
-    return best_len;
 }

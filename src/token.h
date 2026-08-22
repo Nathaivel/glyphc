@@ -47,10 +47,17 @@ typedef struct TokenDef{
     regex_t re;
 }TokenDef;
 
+extern TokenDef token_defs[3];
+extern TokenDef keyword_defs[];
+extern TokenDef operator_defs[];
+
+extern int token_defs_len;
+extern int keyword_defs_len;
+extern int operator_defs_len;
+
 void detect_pattern_token(int token_def_index,regmatch_t match,char* p,int *match_len,TokenType* best_match);
 void detect_literal_token(char* target,int* best_len,TokenDef* lookup_table,int lookup_len,TokenType* best_match);
 char* token_type_str(TokenType token_type);
-int tokenize(char* p);
-void init();
+
 
 #endif
