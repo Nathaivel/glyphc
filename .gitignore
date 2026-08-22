@@ -1,2 +1,4 @@
 build/
 compiler
+.zed/
+testcase/
