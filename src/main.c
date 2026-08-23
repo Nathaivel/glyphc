@@ -1,5 +1,4 @@
-#include "lexer.h"
-#include "token.h"
+#include "parser.h"
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,32 +23,18 @@ char* read_entire_file(const char *path,size_t *out_len){
     if (out_len) *out_len = size;
     return buffer;
 }
+
 int main(int argc,char **argv){
 
     if (argc <= 1){
         printf("No file specified quitting\n");
     }
 
-    init();
-    TokenArray tokens;
-    array_init(&tokens);
-
     //char* word = "let x = 5;if (x > 5) then println('not again');end";
     size_t out_len;
-    char* p = read_entire_file(argv[1],&out_len);
+    char* p = read_entire_file(argv[argc - 1],&out_len);
+    parse(p);
 
-    while(*p != '\0'){
-            int return_len = tokenize(p,&tokens);
-
-            if (return_len < 0){
-                //printf("Unidentified token found... Skipping\n");
-                p++;
-                continue;
-            }
-            p += return_len;
-        }
-
-    print_array(&tokens);
 
     return 0;
 }

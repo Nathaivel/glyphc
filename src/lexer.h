@@ -2,7 +2,7 @@
 #define LEXER_H
 #include "token.h"
 
-void init();
-int tokenize(char* p,TokenArray *tokens);
+void lexer_init();
+Token tokenize(char* p,int* best_len);
 
 #endif

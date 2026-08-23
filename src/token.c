@@ -3,7 +3,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <regex.h>
-#include <ctype.h>
 
 TokenDef token_defs[3] = {
     {TOK_IDENTIFIER,"^[a-zA-Z_][a-zA-Z0-9_]*"},
@@ -12,6 +11,7 @@ TokenDef token_defs[3] = {
 };
 
 TokenDef keyword_defs[] = {
+    {TOK_KEYWORD_LET, "let"},
     {TOK_KEYWORD_IF, "if"},
     {TOK_KEYWORD_WHILE, "while"},
     {TOK_KEYWORD_FOR, "for"},
@@ -19,7 +19,16 @@ TokenDef keyword_defs[] = {
     {TOK_KEYWORD_END, "end"},
 };
 
+TokenDef delimiter_defs[] = {
+    {TOK_LPARAN, "("},
+    {TOK_RPARAN, ")"},
+    {TOK_LBRACE, "{"},
+    {TOK_RBRACE, "}"},
+    {TOK_EOF, "\0"},
+};
+
 TokenDef operator_defs[] = {
+    {TOK_OPERATOR_ASSIGN, "="},
     {TOK_OPERATOR_EQUALS, "=="},
     {TOK_OPERATOR_PLUS, "+"},
     {TOK_OPERATOR_MINUS, "-"},
@@ -39,6 +48,7 @@ TokenDef operator_defs[] = {
 int token_defs_len = (sizeof(token_defs)/sizeof(token_defs[0]));
 int keyword_defs_len = (sizeof(keyword_defs)/sizeof(keyword_defs[0]));
 int operator_defs_len = (sizeof(operator_defs)/sizeof(operator_defs[0]));
+int delimiter_defs_len = (sizeof(delimiter_defs)/sizeof(delimiter_defs[0]));
 
 void detect_pattern_token(int token_def_index,regmatch_t match,char* p,int *match_len,TokenType* best_match){
     if (regexec(&token_defs[token_def_index].re, p, 1, &match, 0) == 0 && match.rm_so == 0){
@@ -51,13 +61,13 @@ void detect_pattern_token(int token_def_index,regmatch_t match,char* p,int *matc
 }
 
 void detect_literal_token(char* target,int* best_len,TokenDef* lookup_table,int lookup_len,TokenType* best_match){
-    char word[16];
-    sscanf(target,"%15s", word);
-
     for (int i = 0;i < lookup_len;i++){
-        if (strcmp(lookup_table[i].pattern,word) == 0){
-            *best_len = strlen(word);
-            *best_match = lookup_table[i].token_type;
+        int plen = strlen(lookup_table[i].pattern);
+        if (strncmp(target,lookup_table[i].pattern,plen) == 0){
+            if (plen > *best_len){
+                *best_len = plen;
+                *best_match = lookup_table[i].token_type;
+            }
         }
     }
 }
@@ -65,6 +75,8 @@ char* token_type_str(TokenType token_type){
     switch(token_type){
         case TOK_KEYWORD:
             return "keyword";
+        case TOK_KEYWORD_LET:
+            return "keyword let";
         case TOK_KEYWORD_IF:
             return "keyword if";
         case TOK_KEYWORD_THEN:
@@ -81,6 +93,8 @@ char* token_type_str(TokenType token_type){
             return "number";
         case TOK_OPERATOR:
             return "operator";
+        case TOK_OPERATOR_ASSIGN:
+            return "operator assign";
         case TOK_OPERATOR_EQUALS:
             return "operator equals";
         case TOK_OPERATOR_PLUS:
@@ -123,6 +137,8 @@ char* token_type_str(TokenType token_type){
             return "newline";
         case TOK_UNIDENTIFIED:
             return "unidentified";
+        case TOK_EOF:
+            return "end of file";
         default:
             return "unidentified";
     }
@@ -137,7 +153,7 @@ void array_init(TokenArray *array){
 void print_array(TokenArray *array){
     for (int i = 0;i < array->count;i++){
         Token token = (*array).token_array[i];
-        printf("Token\nType: %s\nValue: %.*s\n\n",token_type_str(token.token_type),token.size,token.start);
+        printf("Token\nType: %s\nValue: %.*s\n\n",token_type_str(token.token_type),(int)token.size,token.start);
     }
 }
 
