@@ -26,10 +26,10 @@ typedef enum {
     TOK_OPERATOR_GREATER_EQUALS,
     TOK_OPERATOR_LESSER,
     TOK_OPERATOR_LESSER_EQUALS,
-    TOK_OPERATOR_NOT,
-    TOK_OPERATOR_NOT_EQUALS,
     TOK_OPERATOR_AND,
     TOK_OPERATOR_OR,
+    TOK_OPERATOR_NOT,
+    TOK_OPERATOR_NOT_EQUALS,
     TOK_LPARAN,
     TOK_RPARAN,
     TOK_LBRACE,
@@ -68,6 +68,8 @@ extern int keyword_defs_len;
 extern int operator_defs_len;
 extern int delimiter_defs_len;
 
+int is_keyword(TokenType token);
+int is_binaryop(TokenType token);
 void detect_pattern_token(int token_def_index,regmatch_t match,char* p,int *match_len,TokenType* best_match);
 void detect_literal_token(char* target,int* best_len,TokenDef* lookup_table,int lookup_len,TokenType* best_match);
 char* token_type_str(TokenType token_type);

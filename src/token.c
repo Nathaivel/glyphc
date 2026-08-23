@@ -50,6 +50,14 @@ int keyword_defs_len = (sizeof(keyword_defs)/sizeof(keyword_defs[0]));
 int operator_defs_len = (sizeof(operator_defs)/sizeof(operator_defs[0]));
 int delimiter_defs_len = (sizeof(delimiter_defs)/sizeof(delimiter_defs[0]));
 
+int is_keyword(TokenType token){
+    return (token >= 0) && (token <= 6);
+}
+
+int is_binaryop(TokenType token){
+    return (token >= 11) && (token <= 22);
+}
+
 void detect_pattern_token(int token_def_index,regmatch_t match,char* p,int *match_len,TokenType* best_match){
     if (regexec(&token_defs[token_def_index].re, p, 1, &match, 0) == 0 && match.rm_so == 0){
         int len = match.rm_eo - match.rm_so;

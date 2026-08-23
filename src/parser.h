@@ -8,6 +8,7 @@ typedef enum NodeType{
     NODE_LITERAL,
     NODE_ASSIGNMENT,
     NODE_IDENTIFIER,
+    NODE_PROGRAM,
 }NodeType;
 
 typedef struct ASTNode ASTNode;
@@ -21,6 +22,11 @@ struct ASTNode{
             ASTNode* left;
             ASTNode* right;
         } binary_op;
+        struct{
+            ASTNode** statements;
+            int capacity;
+            int count;
+        } program;
         struct{
             ASTNode* identifier;
             ASTNode* expression;

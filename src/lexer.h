@@ -4,5 +4,6 @@
 
 void lexer_init();
 Token tokenize(char* p,int* best_len);
+TokenArray lex(char* p);
 
 #endif
