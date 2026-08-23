@@ -68,6 +68,10 @@ void detect_pattern_token(int token_def_index,regmatch_t match,char* p,int *matc
     *best_match = token_defs[token_def_index].token_type;
 }
 
+int check_op(TokenArray* token,int index,TokenType match){
+    return (token->token_array[index].token_type == match);
+}
+
 void detect_literal_token(char* target,int* best_len,TokenDef* lookup_table,int lookup_len,TokenType* best_match){
     for (int i = 0;i < lookup_len;i++){
         int plen = strlen(lookup_table[i].pattern);

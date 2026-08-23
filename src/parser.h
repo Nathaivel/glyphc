@@ -36,4 +36,10 @@ struct ASTNode{
 
 
 void parse(char* p);
+ASTNode* parse_expression(TokenArray tokens,int *index);
+ASTNode* parse_logic(TokenArray tokens,int *index);
+ASTNode* parse_comparision(TokenArray tokens,int *index);
+ASTNode* parse_statement(TokenArray tokens,int *index);
+ASTNode* parse_factors(TokenArray tokens,int *index);
+ASTNode* parse_terms(TokenArray tokens,int *index);
 #endif

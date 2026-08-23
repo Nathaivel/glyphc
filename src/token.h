@@ -68,6 +68,7 @@ extern int keyword_defs_len;
 extern int operator_defs_len;
 extern int delimiter_defs_len;
 
+int check_op(TokenArray* token,int index,TokenType match);
 int is_keyword(TokenType token);
 int is_binaryop(TokenType token);
 void detect_pattern_token(int token_def_index,regmatch_t match,char* p,int *match_len,TokenType* best_match);
