@@ -3,3 +3,4 @@ compiler
 .zed/
 testcase/
 glyphc
+gen_tests.sh

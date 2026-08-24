@@ -8,9 +8,12 @@ typedef enum {
     TOK_KEYWORD,
     TOK_KEYWORD_LET,
     TOK_KEYWORD_IF,
+    TOK_KEYWORD_ELSE,
     TOK_KEYWORD_THEN,
     TOK_KEYWORD_END,
     TOK_KEYWORD_WHILE,
+    TOK_KEYWORD_TO,
+    TOK_KEYWORD_BY,
     TOK_KEYWORD_FOR,
     TOK_IDENTIFIER,
     TOK_NUMBER,
@@ -68,6 +71,7 @@ extern int keyword_defs_len;
 extern int operator_defs_len;
 extern int delimiter_defs_len;
 
+TokenType lookup_keyword(char* target,size_t best_len);
 int check_op(TokenArray* token,int index,TokenType match);
 int is_keyword(TokenType token);
 int is_binaryop(TokenType token);

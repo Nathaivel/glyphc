@@ -7,8 +7,12 @@ typedef enum NodeType{
     NODE_BINARY_OP,
     NODE_LITERAL,
     NODE_ASSIGNMENT,
+    NODE_DECLARATION,
     NODE_IDENTIFIER,
     NODE_PROGRAM,
+    NODE_IF,
+    NODE_WHILE,
+    NODE_FOR,
 }NodeType;
 
 typedef struct ASTNode ASTNode;
@@ -31,6 +35,18 @@ struct ASTNode{
             ASTNode* identifier;
             ASTNode* expression;
         } assignment;
+        struct{
+            ASTNode* expression;
+            ASTNode* block;
+            ASTNode* else_block;
+        } if_statement;
+        struct{
+            ASTNode* identifier;
+            ASTNode* start;
+            ASTNode* stop;
+            ASTNode* step;
+            ASTNode* block;
+        } for_statement;
     } node;
 };
 

@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g -fsanitize=address
+CFLAGS = -g -fsanitize=address -fno-omit-frame-pointer
 SRC = src/main.c src/token.c src/lexer.c src/parser.c
 OBJS = build/main.o build/token.o build/lexer.o build/parser.o
 EXECUTABLE = glyphc

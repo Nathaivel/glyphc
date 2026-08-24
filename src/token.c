@@ -13,8 +13,11 @@ TokenDef token_defs[3] = {
 TokenDef keyword_defs[] = {
     {TOK_KEYWORD_LET, "let"},
     {TOK_KEYWORD_IF, "if"},
+    {TOK_KEYWORD_ELSE, "else"},
     {TOK_KEYWORD_WHILE, "while"},
     {TOK_KEYWORD_FOR, "for"},
+    {TOK_KEYWORD_TO, "to"},
+    {TOK_KEYWORD_BY, "by"},
     {TOK_KEYWORD_THEN, "then"},
     {TOK_KEYWORD_END, "end"},
 };
@@ -51,11 +54,11 @@ int operator_defs_len = (sizeof(operator_defs)/sizeof(operator_defs[0]));
 int delimiter_defs_len = (sizeof(delimiter_defs)/sizeof(delimiter_defs[0]));
 
 int is_keyword(TokenType token){
-    return (token >= 0) && (token <= 6);
+    return (token >= TOK_KEYWORD) && (token <= TOK_KEYWORD_FOR);
 }
 
 int is_binaryop(TokenType token){
-    return (token >= 11) && (token <= 22);
+    return (token >= TOK_OPERATOR) && (token <= TOK_OPERATOR_NOT_EQUALS);
 }
 
 void detect_pattern_token(int token_def_index,regmatch_t match,char* p,int *match_len,TokenType* best_match){
@@ -70,6 +73,17 @@ void detect_pattern_token(int token_def_index,regmatch_t match,char* p,int *matc
 
 int check_op(TokenArray* token,int index,TokenType match){
     return (token->token_array[index].token_type == match);
+}
+
+TokenType lookup_keyword(char* target,size_t best_len){
+    for (size_t i = 0;i < keyword_defs_len;i++){
+        size_t keyword_len = strlen(keyword_defs[i].pattern);
+
+        if (keyword_len == best_len && strncmp(target, keyword_defs[i].pattern, best_len) == 0){
+            return keyword_defs[i].token_type;
+        }
+    }
+    return TOK_UNIDENTIFIED;
 }
 
 void detect_literal_token(char* target,int* best_len,TokenDef* lookup_table,int lookup_len,TokenType* best_match){
@@ -91,6 +105,8 @@ char* token_type_str(TokenType token_type){
             return "keyword let";
         case TOK_KEYWORD_IF:
             return "keyword if";
+        case TOK_KEYWORD_ELSE:
+            return "keyword else";
         case TOK_KEYWORD_THEN:
             return "keyword then";
         case TOK_KEYWORD_END:

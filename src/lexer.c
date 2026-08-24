@@ -14,10 +14,17 @@ Token tokenize(char* p, int* best_len){
     regmatch_t match;
 
     if (isalpha(p[0]) || p[0] == '_'){
-        detect_literal_token(p, best_len,keyword_defs,keyword_defs_len, &best_match);
+        int len = 0;
+
+        while(isalnum(p[len]) || p[len] == '_') len++;
+        *best_len = len;
+        best_match = lookup_keyword(p, len);
+
+        //detect_literal_token(p, best_len,keyword_defs,keyword_defs_len, &best_match);
 
         if (best_match == TOK_UNIDENTIFIED){
-            detect_pattern_token(0, match, p, best_len, &best_match);
+            //detect_pattern_token(0, match, p, best_len, &best_match);
+            best_match = TOK_IDENTIFIER;
         }
     }else if (isdigit(p[0])){
         detect_pattern_token(1, match, p, best_len, &best_match);
@@ -27,7 +34,7 @@ Token tokenize(char* p, int* best_len){
     }else if(p[0] == '\n'){
         *best_len = 1;
         best_match = TOK_NEWLINE;
-    }else if(p[0] == '(' | p[0] == ')' | p[0] == '{' | p[0] == '}' | p[0] == '\0'){
+    }else if(p[0] == '(' || p[0] == ')' || p[0] == '{' || p[0] == '}' || p[0] == '\0'){
         detect_literal_token(p, best_len, delimiter_defs, delimiter_defs_len, &best_match);
     }
     else{
@@ -35,13 +42,6 @@ Token tokenize(char* p, int* best_len){
     }
 
     Token token = {best_match,p,*best_len};
-
-    //if (*best_len <= 0) return ;
-
-
-    //push(tokens,token);
-    //printf("TOKEN(TYPE=%s,VALUE='%.*s')\n",token_type_str(best_match),best_len,p);
-    //free(value);
 
     return token;
 }
@@ -53,7 +53,6 @@ Token peek(char* p, int* jump_len){
 
 char* advance(char* p, int jump_len){
     if (jump_len < 0){
-        //printf("Unidentified token found... Skipping\n");
         p++;
         return p;
     }
