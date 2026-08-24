@@ -50,12 +50,13 @@ struct ASTNode{
     } node;
 };
 
-
+ASTNode* create_assignment(TokenArray tokens,int *index,ASTNode* branch);
+ASTNode* create_conditional(TokenArray tokens,int *index,ASTNode* conditional_statement);
+ASTNode* create_block(TokenArray tokens, int *index,ASTNode* block_pointer);
+ASTNode* create_number_node(char* number,size_t size);
+void check_token_validity(TokenArray tokens, int *index,TokenType target_type);
+void print_statement(ASTNode* program,int depth);
+ASTNode* program_init();
 void parse(char* p);
-ASTNode* parse_expression(TokenArray tokens,int *index);
-ASTNode* parse_logic(TokenArray tokens,int *index);
-ASTNode* parse_comparision(TokenArray tokens,int *index);
-ASTNode* parse_statement(TokenArray tokens,int *index);
-ASTNode* parse_factors(TokenArray tokens,int *index);
-ASTNode* parse_terms(TokenArray tokens,int *index);
+
 #endif
