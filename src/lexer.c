@@ -34,7 +34,7 @@ Token tokenize(char* p, int* best_len){
     }else if(p[0] == '\n'){
         *best_len = 1;
         best_match = TOK_NEWLINE;
-    }else if(p[0] == '(' || p[0] == ')' || p[0] == '{' || p[0] == '}' || p[0] == '\0'){
+    }else if(p[0] == '(' || p[0] == ')' || p[0] == '{' || p[0] == '}' || p[0] == '\0' || p[0] == ',' || p[0] == ':'){
         detect_literal_token(p, best_len, delimiter_defs, delimiter_defs_len, &best_match);
     }
     else{

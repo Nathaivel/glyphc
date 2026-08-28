@@ -4,6 +4,8 @@
 #include <stdio.h>
 
 
+
+
 ASTNode* parse_number(TokenArray tokens, int *index){
     ASTNode* new_node = malloc(sizeof(ASTNode));
     new_node->token_type = NODE_LITERAL;
@@ -19,6 +21,8 @@ ASTNode* parse_identifier(TokenArray tokens, int *index){
     (*index)++;
     return new_node;
 }
+
+
 
 ASTNode* make_binary_op(ASTNode* left,ASTNode* right, Token operation){
     ASTNode* new_node = malloc(sizeof(ASTNode));
@@ -42,6 +46,7 @@ ASTNode* parse_factors(TokenArray tokens,int *index){
     if (temp.token_type == TOK_NUMBER){
         return parse_number(tokens, index);
     }else if (temp.token_type == TOK_IDENTIFIER){
+        if (tokens.token_array[*index+1].token_type == TOK_LPARAN) return parse_function_call(tokens,index);
         return parse_identifier(tokens, index);
     }else{
         fprintf(stdout,"Syntax error\n");

@@ -6,11 +6,73 @@
 #include "expressions.h"
 #include "statements.h"
 
-ASTNode* program_init(){
+ASTNode* parse_function_call(TokenArray tokens,int *index){
+    ASTNode* function_call = malloc(sizeof(ASTNode));
+    function_call->token_type = NODE_FUNCTION_CALL;
+    function_call->node.function.identifier = parse_identifier(tokens, index);
+
+    check_token_validity(tokens, index, TOK_LPARAN);
+    ASTNode* parameters = program_init(NODE_PARAMETERS);
+    (*index)++;
+
+    while (tokens.token_array[*index].token_type != TOK_RPARAN && tokens.token_array[*index].token_type != TOK_EOF){
+        //check_token_validity(tokens,index, TOK_IDENTIFIER);
+        ASTNode* parameter = parse_logic(tokens, index);
+        append_ast_node(&parameters, parameter);
+
+        if (tokens.token_array[*index].token_type != TOK_COMMA){
+            break;
+        }else{
+            (*index)++;
+        }
+    }
+    check_token_validity(tokens,index, TOK_RPARAN);
+    (*index)++;
+
+    function_call->node.function.parameters = parameters;
+
+    return function_call;
+}
+
+char* str_of_type(TypeKind type){
+    switch(type){
+        case TYPE_INT:
+            return "integer";
+            break;
+        case TYPE_FLOAT:
+            return "float";
+            break;
+        case TYPE_STRING:
+            return  "string";
+            break;
+        default:
+            return "NULL";
+            break;
+    }
+}
+
+TypeKind token_to_type(TokenType token_type){
+    switch(token_type){
+        case TOK_KEYWORD_INT:
+            return TYPE_INT;
+            break;
+        case TOK_KEYWORD_FLOAT:
+            return TYPE_FLOAT;
+            break;
+        case TOK_KEYWORD_STRING:
+            return  TYPE_STRING;
+            break;
+        default:
+            return TYPE_NULL;
+            break;
+    }
+}
+
+ASTNode* program_init(NodeType token_type){
     ASTNode* block = malloc(sizeof(ASTNode));
-    block->token_type = NODE_PROGRAM;
-    block->node.program.count = 0;
-    block->node.program.statements = NULL;
+    block->token_type = token_type;
+    block->node.node_list.count = 0;
+    block->node.node_list.statements = NULL;
 
     return block;
 }
@@ -34,7 +96,8 @@ void check_token_validity(TokenArray tokens, int *index,TokenType target_type){
     }
 }
 
-ASTNode* create_assignment(TokenArray tokens,int *index,ASTNode* branch){
+ASTNode* create_assignment(TokenArray tokens,int *index){
+    ASTNode* branch = malloc(sizeof(ASTNode));
     ASTNode* leaf = malloc(sizeof(ASTNode));
     leaf->token_type = NODE_IDENTIFIER;
     leaf->node.identifier = tokens.token_array[*index];
@@ -43,13 +106,39 @@ ASTNode* create_assignment(TokenArray tokens,int *index,ASTNode* branch){
     (*index)++;
     Token temp = tokens.token_array[*index];
 
+    if (temp.token_type == TOK_COLON){
+        branch->token_type = NODE_DECLARATION;
+
+        (*index)++;
+        branch->type = token_to_type(tokens.token_array[*index].token_type);
+        (*index)++;
+
+        temp = tokens.token_array[*index];
+    }else{
+        branch->token_type = NODE_ASSIGNMENT;
+    }
+
     if (temp.token_type == TOK_OPERATOR_ASSIGN){
         (*index)++;
         branch->node.assignment.expression = parse_logic(tokens, index);
         return branch;
     }
+    else if (temp.token_type == TOK_OPERATOR_PLUS_EQUALS || temp.token_type == TOK_OPERATOR_MINUS_EQUALS || temp.token_type == TOK_OPERATOR_MULTIPLY_EQUALS || temp.token_type == TOK_OPERATOR_DIVIDE_EQUALS || temp.token_type == TOK_OPERATOR_MODULO_EQUALS){
+        (*index)++;
+        ASTNode* operator = malloc(sizeof(ASTNode));
+        operator->node.binary_op.operation = temp;
+        operator->node.binary_op.left = leaf;
+        operator->node.binary_op.right = parse_logic(tokens, index);
+        branch->node.assignment.expression = operator;
+
+        return branch;
+    }else{
+        fprintf(stdout,"Syntax error expected %s recieved %s",token_type_str(TOK_OPERATOR_ASSIGN),token_type_str(temp.token_type));
+        exit(1);
+    }
     return NULL;
 }
+
 ASTNode* create_conditional(TokenArray tokens,int *index,ASTNode* conditional_statement){
     if (tokens.token_array[*index].token_type == TOK_LPARAN){
         conditional_statement->node.if_statement.expression = parse_logic(tokens, index);
@@ -64,7 +153,7 @@ ASTNode* create_conditional(TokenArray tokens,int *index,ASTNode* conditional_st
 ASTNode* create_block(TokenArray tokens, int *index,ASTNode* block_pointer){
     while(tokens.token_array[*index].token_type != TOK_EOF && tokens.token_array[*index].token_type != TOK_KEYWORD_END && tokens.token_array[*index].token_type != TOK_KEYWORD_ELSE){
         ASTNode* statement = parse_statement(tokens,index);
-        append_statement(&block_pointer, statement);
+        append_ast_node(&block_pointer, statement);
     }
     return block_pointer;
 }
@@ -77,15 +166,37 @@ void print_statement(ASTNode* program,int depth){
     switch(program->token_type){
         case NODE_PROGRAM:
             printf("PROGRAM\n");
-            ASTNode** statements = program->node.program.statements;
-            for (int i = 0;i < program->node.program.count;i++){
+            ASTNode** statements = program->node.node_list.statements;
+            for (int i = 0;i < program->node.node_list.count;i++){
                 print_statement(statements[i], depth + 1);
+            }
+            break;
+        case NODE_PARAMETERS:
+            printf("PARAMETERS\n");
+            ASTNode** parameters = program->node.node_list.statements;
+            for (int i = 0;i < program->node.node_list.count;i++){
+                print_statement(parameters[i], depth + 1);
             }
             break;
         case NODE_ASSIGNMENT:
             printf("(ASSIGNMENT)\n");
             print_statement(program->node.assignment.identifier, depth + 1);
             print_statement(program->node.assignment.expression, depth + 1);
+            break;
+        case NODE_RETURN:
+            printf("(RETURN)\n");
+            print_statement(program->node.expression, depth + 1);
+            break;
+        case NODE_FUNCTION_DECLARATION:
+            printf("(FUNCTION DECLARATION)\n");
+            print_statement(program->node.function.identifier, depth + 1);
+            print_statement(program->node.function.parameters, depth + 1);
+            print_statement(program->node.function.block, depth + 1);
+            break;
+        case NODE_FUNCTION_CALL:
+            printf("(FUNCTION CALL)\n");
+            print_statement(program->node.function.identifier, depth + 1);
+            print_statement(program->node.function.parameters, depth + 1);
             break;
         case NODE_IF:
             printf("(IF)\n");
@@ -107,7 +218,7 @@ void print_statement(ASTNode* program,int depth){
             print_statement(program->node.for_statement.block, depth + 1);
             break;
         case NODE_DECLARATION:
-            printf("(DECLARATION)\n");
+            printf("(DECLARATION): (%s)\n",str_of_type(program->type));
             print_statement(program->node.assignment.identifier, depth + 1);
             print_statement(program->node.assignment.expression, depth + 1);
             break;
@@ -133,12 +244,12 @@ void parse(char *p){
     int i = 0;
     ASTNode* tree = malloc(sizeof(ASTNode));
     tree->token_type = NODE_PROGRAM;
-    tree->node.program.statements = NULL;
-    tree->node.program.count = 0;
+    tree->node.node_list.statements = NULL;
+    tree->node.node_list.count = 0;
 
     while(tokens.token_array[i].token_type != TOK_EOF){
         ASTNode* statement = parse_statement(tokens,&i);
-        append_statement(&tree, statement);
+        append_ast_node(&tree, statement);
     }
     //printf("%d\n",i);
     print_statement(tree, 0);

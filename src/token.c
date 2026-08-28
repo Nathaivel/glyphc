@@ -12,6 +12,11 @@ TokenDef token_defs[3] = {
 
 TokenDef keyword_defs[] = {
     {TOK_KEYWORD_LET, "let"},
+    {TOK_KEYWORD_RETURN, "return"},
+    {TOK_KEYWORD_INT, "int"},
+    {TOK_KEYWORD_FLOAT, "float"},
+    {TOK_KEYWORD_STRING, "string"},
+    {TOK_KEYWORD_FUNCTION, "defn"},
     {TOK_KEYWORD_IF, "if"},
     {TOK_KEYWORD_ELSE, "else"},
     {TOK_KEYWORD_WHILE, "while"},
@@ -27,6 +32,8 @@ TokenDef delimiter_defs[] = {
     {TOK_RPARAN, ")"},
     {TOK_LBRACE, "{"},
     {TOK_RBRACE, "}"},
+    {TOK_COMMA, ","},
+    {TOK_COLON, ":"},
     {TOK_EOF, "\0"},
 };
 
@@ -34,10 +41,17 @@ TokenDef operator_defs[] = {
     {TOK_OPERATOR_ASSIGN, "="},
     {TOK_OPERATOR_EQUALS, "=="},
     {TOK_OPERATOR_PLUS, "+"},
+    {TOK_OPERATOR_PLUS_EQUALS, "+="},
+    {TOK_OPERATOR_INCREMENT, "++"},
     {TOK_OPERATOR_MINUS, "-"},
+    {TOK_OPERATOR_DECREMENT, "--"},
+    {TOK_OPERATOR_MINUS_EQUALS, "-="},
     {TOK_OPERATOR_MULTIPLY, "*"},
+    {TOK_OPERATOR_MULTIPLY_EQUALS, "*="},
     {TOK_OPERATOR_DIVIDE, "/"},
+    {TOK_OPERATOR_DIVIDE_EQUALS, "/="},
     {TOK_OPERATOR_MODULO, "%"},
+    {TOK_OPERATOR_MODULO, "%="},
     {TOK_OPERATOR_GREATER, ">"},
     {TOK_OPERATOR_LESSER, "<"},
     {TOK_OPERATOR_LESSER_EQUALS, "<="},
