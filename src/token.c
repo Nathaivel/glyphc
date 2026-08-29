@@ -1,11 +1,12 @@
 #include "token.h"
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <regex.h>
 
 TokenDef token_defs[3] = {
-    {TOK_IDENTIFIER,"^[a-zA-Z_][a-zA-Z0-9_]*"},
+    {TOK_FLOAT, "^[0-9]+.[0-9]+"},
     {TOK_NUMBER, "^[0-9]+"},
     {TOK_WHITESPACE, "^[ \t]+"}
 };
@@ -75,6 +76,54 @@ int is_binaryop(TokenType token){
     return (token >= TOK_OPERATOR) && (token <= TOK_OPERATOR_NOT_EQUALS);
 }
 
+void detect_string_token(char* p,int* match_len,TokenType* best_match){
+    size_t i = 1;
+
+    while (p[i] != '\0'){
+        if (p[i] == '\\'){
+            if (p[i+1] == '\0'){
+                break;
+            }
+            i += 2;
+            continue;
+        }
+
+        if (p[i] == '"'){
+            i++;
+            *match_len = i;
+            *best_match = TOK_STRING;
+            return;
+        }
+
+        i++;
+    }
+
+    fprintf(stdout,"unterminated string\n");
+    exit(1);
+}
+
+void detect_number_token(char* p,int* match_len,TokenType* best_match){
+    size_t i = 0;
+
+    while (isdigit(p[i])){
+        i++;
+    }
+
+    if (p[i] == '.' && isdigit(p[i+1])){
+        i++;
+        while (isdigit(p[i])){
+            i++;
+        }
+
+        *match_len = i;
+        *best_match = TOK_FLOAT;
+        return;
+    }
+
+    *match_len = i;
+    *best_match = TOK_INTEGER;
+}
+
 void detect_pattern_token(int token_def_index,regmatch_t match,char* p,int *match_len,TokenType* best_match){
     if (regexec(&token_defs[token_def_index].re, p, 1, &match, 0) == 0 && match.rm_so == 0){
         int len = match.rm_eo - match.rm_so;
@@ -133,6 +182,12 @@ char* token_type_str(TokenType token_type){
             return "identifier";
         case TOK_NUMBER:
             return "number";
+        case TOK_INTEGER:
+            return "integer";
+        case TOK_FLOAT:
+            return "float";
+        case TOK_STRING:
+            return "string";
         case TOK_OPERATOR:
             return "operator";
         case TOK_OPERATOR_ASSIGN:
@@ -195,7 +250,7 @@ void array_init(TokenArray *array){
 void print_array(TokenArray *array){
     for (int i = 0;i < array->count;i++){
         Token token = (*array).token_array[i];
-        printf("Token\nType: %s\nValue: %.*s\n\n",token_type_str(token.token_type),(int)token.size,token.start);
+        printf("Token\nType: %s\nValue: %.*s\nPosition: (%d:%d)\n\n",token_type_str(token.token_type),(int)token.size,token.start,(int)token.line,(int)token.column);
     }
 }
 

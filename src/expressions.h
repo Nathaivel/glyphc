@@ -3,7 +3,7 @@
 #ifndef EXPRESSIONS_H
 #define EXPRESSIONS_H
 
-ASTNode* parse_number(TokenArray tokens, int *index);
+ASTNode* parse_literal(TokenArray tokens, int *index);
 ASTNode* parse_identifier(TokenArray tokens, int *index);
 ASTNode* make_binary_op(ASTNode* left,ASTNode* right, Token operation);
 ASTNode* parse_factors(TokenArray tokens,int *index);

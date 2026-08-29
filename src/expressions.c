@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "token.h"
 #include "expressions.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -6,7 +7,7 @@
 
 
 
-ASTNode* parse_number(TokenArray tokens, int *index){
+ASTNode* parse_literal(TokenArray tokens, int *index){
     ASTNode* new_node = malloc(sizeof(ASTNode));
     new_node->token_type = NODE_LITERAL;
     new_node->node.literal = tokens.token_array[*index];
@@ -43,14 +44,14 @@ ASTNode* parse_factors(TokenArray tokens,int *index){
         return inner;
     }
 
-    if (temp.token_type == TOK_NUMBER){
-        return parse_number(tokens, index);
+    if (temp.token_type == TOK_INTEGER || temp.token_type == TOK_FLOAT || temp.token_type == TOK_STRING){
+        return parse_literal(tokens, index);
     }else if (temp.token_type == TOK_IDENTIFIER){
         if (tokens.token_array[*index+1].token_type == TOK_LPARAN) return parse_function_call(tokens,index);
         return parse_identifier(tokens, index);
     }else{
-        fprintf(stdout,"Syntax error\n");
-        exit(1);
+        syntax_error(tokens,index, "expression", token_type_str(temp.token_type));
+        return NULL;
     }
 }
 

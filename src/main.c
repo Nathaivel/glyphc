@@ -37,6 +37,7 @@ int main(int argc,char **argv){
     size_t out_len;
     char* p = read_entire_file(argv[argc - 1],&out_len);
     TokenArray tokens = lex(p);
+    tokens.name = argv[argc - 1];
     ASTNode* ast = parse(p,tokens);
 
 

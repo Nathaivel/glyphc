@@ -2,8 +2,47 @@
 #include "token.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "expressions.h"
 #include "statements.h"
+
+char* error_marker(int column,int size){
+    char* error_marking = malloc(column + size + 1);
+    int i;
+
+    for (i = 0;i < column-1;i++){
+        error_marking[i] = ' ';
+    }
+    for (;i < column+size-1;i++){
+        error_marking[i] = '^';
+    }
+    error_marking[size+column] = '\0';
+    return error_marking;
+}
+
+const char* get_line(char* source, int line,int *len){
+    if (line == 0) return NULL;
+
+    char* start = source;
+    int current_line = 1;
+
+    while (line > current_line){
+        char* end = strchr(start, '\n');
+
+        if (end == NULL) return NULL;
+
+        start = end + 1;
+        current_line++;
+    }
+    char* end = strchr(start, '\n');
+
+    if (end == NULL){
+        end = start + strlen(start);
+    }
+
+    *len = end - start;
+    return start;
+}
 
 ASTNode* parse_function_call(TokenArray tokens,int *index){
     ASTNode* function_call = malloc(sizeof(ASTNode));
@@ -78,7 +117,7 @@ ASTNode* program_init(NodeType token_type){
 
 ASTNode* create_number_node(char* number,size_t size){
     Token initial;
-    initial.token_type = TOK_NUMBER;
+    initial.token_type = TOK_INTEGER;
     initial.size = size;
     initial.start = number;
 
@@ -88,10 +127,29 @@ ASTNode* create_number_node(char* number,size_t size){
 
     return initial_node;
 }
+void syntax_error(TokenArray tokens,int* index,char* expected,char* unexpected){
+    Token temp = tokens.token_array[*index];
+
+    int line_len;
+    const char* line = get_line(tokens.source, temp.line, &line_len);
+    fprintf(stdout,
+        "Error: unexpected token\n\n-->%s:%zu:%zu<-- \nexpected %s found %s\n\n |\n%zu|%.*s\n |%s\n",
+        tokens.name,
+        temp.line,
+        temp.column,
+        expected,
+        unexpected,
+        temp.line,
+        line_len,
+        line,
+        error_marker(temp.column, temp.size)
+    );
+    exit(1);
+}
+
 void check_token_validity(TokenArray tokens, int *index,TokenType target_type){
     if (tokens.token_array[*index].token_type != target_type){
-        fprintf(stdout, "expected %s\n",token_type_str(target_type));
-        exit(1);
+        syntax_error(tokens,index, token_type_str(target_type), token_type_str(tokens.token_array[*index].token_type));
     }
 }
 

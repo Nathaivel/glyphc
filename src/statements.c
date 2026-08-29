@@ -41,19 +41,19 @@ ASTNode* parse_for_statement(TokenArray tokens,int *index){
 
 
     check_token_validity(tokens, index, TOK_NUMBER);
-    for_statement->node.for_statement.stop = parse_number(tokens, index);
+    for_statement->node.for_statement.stop = parse_literal(tokens, index);
 
     if (tokens.token_array[*index].token_type == TOK_KEYWORD_TO){
         (*index)++;
         check_token_validity(tokens, index, TOK_NUMBER);
         for_statement->node.for_statement.start = for_statement->node.for_statement.stop;
-        for_statement->node.for_statement.stop = parse_number(tokens, index);
+        for_statement->node.for_statement.stop = parse_literal(tokens, index);
     }
 
     if (tokens.token_array[*index].token_type == TOK_KEYWORD_BY){
         (*index)++;
         check_token_validity(tokens, index, TOK_NUMBER);
-        for_statement->node.for_statement.step = parse_number(tokens, index);
+        for_statement->node.for_statement.step = parse_literal(tokens, index);
     }
 
 
@@ -69,8 +69,7 @@ ASTNode* parse_for_statement(TokenArray tokens,int *index){
         return for_statement;
     }
     else {
-        fprintf(stdout,"Expected 'end'");
-        exit(1);
+        check_token_validity(tokens,index, TOK_KEYWORD_END);
     }
     return NULL;
 }
@@ -95,8 +94,7 @@ ASTNode* parse_while_statement(TokenArray tokens,int *index){
         return while_statement;
     }
     else {
-        fprintf(stdout,"Expected 'end'");
-        exit(1);
+        check_token_validity(tokens,index, TOK_KEYWORD_END);
     }
     return NULL;
 }
@@ -129,8 +127,7 @@ ASTNode* parse_if_statement(TokenArray tokens,int *index){
         return if_statement;
     }
     else {
-        fprintf(stdout,"Expected 'end'");
-        exit(1);
+        check_token_validity(tokens, index, TOK_KEYWORD_END);
     }
     return NULL;
 }

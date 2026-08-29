@@ -27,9 +27,11 @@ Token tokenize(char* p, int* best_len){
             best_match = TOK_IDENTIFIER;
         }
     }else if (isdigit(p[0])){
-        detect_pattern_token(1, match, p, best_len, &best_match);
+        detect_number_token(p, best_len, &best_match);
+    }else if(p[0] == '"'){
+        detect_string_token(p, best_len, &best_match);
     }else if(p[0] == ' '){
-        *best_len = -1;
+        *best_len = 1;
         best_match = TOK_WHITESPACE;
     }else if(p[0] == '\n'){
         *best_len = 1;
@@ -63,12 +65,24 @@ char* advance(char* p, int jump_len){
 TokenArray lex(char* p){
     lexer_init();
     TokenArray tokens;
+    tokens.source = p;
     Token token;
     int return_len;
     array_init(&tokens);
+    int line = 1;
+    int column = 1;
 
     while(1){
             Token token = peek(p,&return_len);
+
+
+            token.line = line;
+            token.column = column;
+
+            if (token.token_type == TOK_NEWLINE){
+                line++;
+                column = 1;
+            }else column += return_len;
 
             if (token.token_type != TOK_WHITESPACE){
                  push(&tokens,token);

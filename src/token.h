@@ -22,6 +22,9 @@ typedef enum {
     TOK_KEYWORD_FOR,
     TOK_IDENTIFIER,
     TOK_NUMBER,
+    TOK_FLOAT,
+    TOK_INTEGER,
+    TOK_STRING,
     TOK_OPERATOR,
     TOK_OPERATOR_ASSIGN,
     TOK_OPERATOR_EQUALS,
@@ -61,6 +64,9 @@ typedef struct Token{
     TokenType token_type;
     const char* start;
     size_t size;
+
+    size_t line;
+    size_t column;
 }Token;
 
 typedef struct TokenDef{
@@ -73,6 +79,8 @@ typedef struct TokenArray{
     Token* token_array;
     int count;
     int size;
+    char *source;
+    char *name;
 }TokenArray;
 
 extern TokenDef token_defs[3];
@@ -85,6 +93,8 @@ extern int keyword_defs_len;
 extern int operator_defs_len;
 extern int delimiter_defs_len;
 
+void detect_number_token(char* p,int* match_len,TokenType* best_match);
+void detect_string_token(char* p,int* match_len,TokenType* best_match);
 TokenType lookup_keyword(char* target,size_t best_len);
 int check_op(TokenArray* token,int index,TokenType match);
 int is_keyword(TokenType token);
