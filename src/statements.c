@@ -149,7 +149,7 @@ ASTNode* parse_function(TokenArray tokens,int *index){
 
     while (tokens.token_array[*index].token_type != TOK_RPARAN && tokens.token_array[*index].token_type != TOK_EOF){
          check_token_validity(tokens,index, TOK_IDENTIFIER);
-         ASTNode* parameter = parse_identifier(tokens, index);
+         ASTNode* parameter = create_variable(tokens, index);
          append_ast_node(&parameters, parameter);
 
          if (tokens.token_array[*index].token_type != TOK_COMMA){

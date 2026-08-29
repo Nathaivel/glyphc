@@ -1,5 +1,4 @@
 #include "parser.h"
-#include "lexer.h"
 #include "token.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -96,15 +95,21 @@ void check_token_validity(TokenArray tokens, int *index,TokenType target_type){
     }
 }
 
-ASTNode* create_assignment(TokenArray tokens,int *index){
+ASTNode* create_variable(TokenArray tokens,int *index){
     ASTNode* branch = malloc(sizeof(ASTNode));
+
     ASTNode* leaf = malloc(sizeof(ASTNode));
     leaf->token_type = NODE_IDENTIFIER;
     leaf->node.identifier = tokens.token_array[*index];
+
+
     branch->node.assignment.identifier = leaf;
+    branch->node.assignment.expression = NULL;
 
     (*index)++;
     Token temp = tokens.token_array[*index];
+
+
 
     if (temp.token_type == TOK_COLON){
         branch->token_type = NODE_DECLARATION;
@@ -113,10 +118,17 @@ ASTNode* create_assignment(TokenArray tokens,int *index){
         branch->type = token_to_type(tokens.token_array[*index].token_type);
         (*index)++;
 
-        temp = tokens.token_array[*index];
     }else{
         branch->token_type = NODE_ASSIGNMENT;
     }
+
+    return branch;
+}
+
+ASTNode* create_assignment(TokenArray tokens,int *index){
+
+    ASTNode* branch = create_variable(tokens,index);
+    Token temp = tokens.token_array[*index];
 
     if (temp.token_type == TOK_OPERATOR_ASSIGN){
         (*index)++;
@@ -127,16 +139,12 @@ ASTNode* create_assignment(TokenArray tokens,int *index){
         (*index)++;
         ASTNode* operator = malloc(sizeof(ASTNode));
         operator->node.binary_op.operation = temp;
-        operator->node.binary_op.left = leaf;
+        operator->node.binary_op.left = branch->node.assignment.identifier;
         operator->node.binary_op.right = parse_logic(tokens, index);
         branch->node.assignment.expression = operator;
-
-        return branch;
-    }else{
-        fprintf(stdout,"Syntax error expected %s recieved %s",token_type_str(TOK_OPERATOR_ASSIGN),token_type_str(temp.token_type));
-        exit(1);
     }
-    return NULL;
+
+    return branch;
 }
 
 ASTNode* create_conditional(TokenArray tokens,int *index,ASTNode* conditional_statement){
@@ -239,8 +247,7 @@ void print_statement(ASTNode* program,int depth){
     }
 }
 
-void parse(char *p){
-    TokenArray tokens = lex(p);
+ASTNode* parse(char *p, TokenArray tokens){
     int i = 0;
     ASTNode* tree = malloc(sizeof(ASTNode));
     tree->token_type = NODE_PROGRAM;
@@ -253,4 +260,5 @@ void parse(char *p){
     }
     //printf("%d\n",i);
     print_statement(tree, 0);
+    return tree;
 }

@@ -76,9 +76,10 @@ ASTNode* create_assignment(TokenArray tokens,int *index);
 ASTNode* create_conditional(TokenArray tokens,int *index,ASTNode* conditional_statement);
 ASTNode* create_block(TokenArray tokens, int *index,ASTNode* block_pointer);
 ASTNode* create_number_node(char* number,size_t size);
+ASTNode* create_variable(TokenArray tokens,int *index);
 void check_token_validity(TokenArray tokens, int *index,TokenType target_type);
 void print_statement(ASTNode* program,int depth);
 ASTNode* program_init(NodeType token_type);
-void parse(char* p);
+ASTNode* parse(char* p,TokenArray tokens);
 
 #endif

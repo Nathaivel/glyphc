@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "lexer.h"
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,9 +32,12 @@ int main(int argc,char **argv){
     }
 
     //char* word = "let x = 5;if (x > 5) then println('not again');end";
+
+
     size_t out_len;
     char* p = read_entire_file(argv[argc - 1],&out_len);
-    parse(p);
+    TokenArray tokens = lex(p);
+    ASTNode* ast = parse(p,tokens);
 
 
     return 0;
