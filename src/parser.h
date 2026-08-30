@@ -71,6 +71,7 @@ struct ASTNode{
     } node;
 };
 
+char* str_of_type(TypeKind type);
 ASTNode* parse_function_call(TokenArray tokens,int *index);
 ASTNode* create_assignment(TokenArray tokens,int *index);
 ASTNode* create_conditional(TokenArray tokens,int *index,ASTNode* conditional_statement);
