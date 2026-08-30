@@ -41,7 +41,6 @@ int main(int argc,char **argv){
     TokenArray tokens = lex(p);
     tokens.name = argv[argc - 1];
     ASTNode* ast = parse(p,tokens);
-    SymbolHashMap table = init_symbol_table();
     ASTNode* validated_ast = semantic_analysis(ast);
 
 

@@ -16,6 +16,12 @@ TypeKind get_literal_type(Token token){
         case TOK_FLOAT:
             return TYPE_FLOAT;
             break;
+        case TOK_KEYWORD_FALSE:
+            return TYPE_BOOL;
+            break;
+        case TOK_KEYWORD_TRUE:
+            return TYPE_BOOL;
+            break;
         default:
             return TYPE_VOID;
     }
@@ -59,7 +65,7 @@ ASTNode* parse_factors(TokenArray tokens,int *index){
         return inner;
     }
 
-    if (temp.token_type == TOK_INTEGER || temp.token_type == TOK_FLOAT || temp.token_type == TOK_STRING){
+    if (temp.token_type == TOK_INTEGER || temp.token_type == TOK_FLOAT || temp.token_type == TOK_STRING || temp.token_type == TOK_KEYWORD_FALSE || temp.token_type == TOK_KEYWORD_TRUE){
         return parse_literal(tokens, index);
     }else if (temp.token_type == TOK_IDENTIFIER){
         if (tokens.token_array[*index+1].token_type == TOK_LPARAN) return parse_function_call(tokens,index);

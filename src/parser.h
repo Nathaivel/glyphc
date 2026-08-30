@@ -23,8 +23,10 @@ typedef enum TypeKind{
     TYPE_INT,
     TYPE_FLOAT,
     TYPE_STRING,
+    TYPE_BOOL,
     TYPE_VOID,
-    TYPE_NULL
+    TYPE_NULL,
+    TYPE_ERROR,
 }TypeKind;
 
 typedef struct ASTNode ASTNode;
@@ -72,6 +74,7 @@ struct ASTNode{
     } node;
 };
 
+int is_numeric(TypeKind token);
 char* str_of_type(TypeKind type);
 ASTNode* parse_function_call(TokenArray tokens,int *index);
 ASTNode* create_assignment(TokenArray tokens,int *index);

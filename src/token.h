@@ -11,6 +11,9 @@ typedef enum {
     TOK_KEYWORD_INT,
     TOK_KEYWORD_FLOAT,
     TOK_KEYWORD_STRING,
+    TOK_KEYWORD_BOOL,
+    TOK_KEYWORD_TRUE,
+    TOK_KEYWORD_FALSE,
     TOK_KEYWORD_FUNCTION,
     TOK_KEYWORD_IF,
     TOK_KEYWORD_ELSE,
@@ -22,32 +25,38 @@ typedef enum {
     TOK_KEYWORD_FOR,
     TOK_IDENTIFIER,
     TOK_NUMBER,
+    TOK_BOOL,
     TOK_FLOAT,
     TOK_INTEGER,
     TOK_STRING,
     TOK_OPERATOR,
     TOK_OPERATOR_ASSIGN,
-    TOK_OPERATOR_EQUALS,
+
     TOK_OPERATOR_PLUS,
+    TOK_OPERATOR_MINUS,
+    TOK_OPERATOR_MULTIPLY,
+    TOK_OPERATOR_DIVIDE,
+    TOK_OPERATOR_MODULO,
+
     TOK_OPERATOR_PLUS_EQUALS,
     TOK_OPERATOR_INCREMENT,
-    TOK_OPERATOR_MINUS,
     TOK_OPERATOR_MINUS_EQUALS,
     TOK_OPERATOR_DECREMENT,
-    TOK_OPERATOR_MULTIPLY,
     TOK_OPERATOR_MULTIPLY_EQUALS,
-    TOK_OPERATOR_DIVIDE,
     TOK_OPERATOR_DIVIDE_EQUALS,
-    TOK_OPERATOR_MODULO,
     TOK_OPERATOR_MODULO_EQUALS,
+
+    TOK_OPERATOR_EQUALS,
     TOK_OPERATOR_GREATER,
     TOK_OPERATOR_GREATER_EQUALS,
     TOK_OPERATOR_LESSER,
     TOK_OPERATOR_LESSER_EQUALS,
+    TOK_OPERATOR_NOT_EQUALS,
+
     TOK_OPERATOR_AND,
     TOK_OPERATOR_OR,
     TOK_OPERATOR_NOT,
-    TOK_OPERATOR_NOT_EQUALS,
+
     TOK_LPARAN,
     TOK_RPARAN,
     TOK_LBRACE,
@@ -92,6 +101,10 @@ extern int token_defs_len;
 extern int keyword_defs_len;
 extern int operator_defs_len;
 extern int delimiter_defs_len;
+
+int is_arithemeticop(TokenType token);
+int is_comparisionalop(TokenType token);
+int is_logicalop(TokenType token);
 
 void detect_number_token(char* p,int* match_len,TokenType* best_match);
 void detect_string_token(char* p,int* match_len,TokenType* best_match);

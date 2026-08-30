@@ -17,6 +17,9 @@ TokenDef keyword_defs[] = {
     {TOK_KEYWORD_INT, "int"},
     {TOK_KEYWORD_FLOAT, "float"},
     {TOK_KEYWORD_STRING, "string"},
+    {TOK_KEYWORD_BOOL, "bool"},
+    {TOK_KEYWORD_TRUE, "true"},
+    {TOK_KEYWORD_FALSE, "false"},
     {TOK_KEYWORD_FUNCTION, "defn"},
     {TOK_KEYWORD_IF, "if"},
     {TOK_KEYWORD_ELSE, "else"},
@@ -73,7 +76,20 @@ int is_keyword(TokenType token){
 }
 
 int is_binaryop(TokenType token){
-    return (token >= TOK_OPERATOR) && (token <= TOK_OPERATOR_NOT_EQUALS);
+    return (token >= TOK_OPERATOR) && (token <= TOK_OPERATOR_NOT);
+}
+
+
+int is_arithemeticop(TokenType token){
+    return (token >= TOK_OPERATOR_PLUS) && (token <= TOK_OPERATOR_MODULO);
+}
+
+int is_comparisionalop(TokenType token){
+    return (token >= TOK_OPERATOR_EQUALS) && (token <= TOK_OPERATOR_NOT_EQUALS);
+}
+
+int is_logicalop(TokenType token){
+    return (token >= TOK_OPERATOR_AND) && (token <= TOK_OPERATOR_NOT);
 }
 
 void detect_string_token(char* p,int* match_len,TokenType* best_match){
@@ -172,6 +188,12 @@ char* token_type_str(TokenType token_type){
             return "keyword else";
         case TOK_KEYWORD_THEN:
             return "keyword then";
+        case TOK_KEYWORD_BOOL:
+            return "keyword bool";
+        case TOK_KEYWORD_TRUE:
+            return "keyword true";
+        case TOK_KEYWORD_FALSE:
+            return "keyword false";
         case TOK_KEYWORD_END:
             return "keyword end";
         case TOK_KEYWORD_WHILE:

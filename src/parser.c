@@ -6,6 +6,10 @@
 #include "expressions.h"
 #include "statements.h"
 
+int is_numeric(TypeKind type){
+    return (type == TYPE_INT) || (type == TYPE_FLOAT);
+}
+
 char* error_marker(int column,int size){
     char* error_marking = malloc(column + size + 1);
     int i;
@@ -83,6 +87,9 @@ char* str_of_type(TypeKind type){
         case TYPE_STRING:
             return  "string";
             break;
+        case TYPE_BOOL:
+            return  "bool";
+            break;
         default:
             return "NULL";
             break;
@@ -99,6 +106,9 @@ TypeKind token_to_type(TokenType token_type){
             break;
         case TOK_KEYWORD_STRING:
             return  TYPE_STRING;
+            break;
+        case TOK_KEYWORD_BOOL:
+            return  TYPE_BOOL;
             break;
         default:
             return TYPE_NULL;
