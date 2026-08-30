@@ -229,7 +229,9 @@ ASTNode* create_conditional(TokenArray tokens,int *index,ASTNode* conditional_st
 ASTNode* create_block(TokenArray tokens, int *index,ASTNode* block_pointer){
     while(tokens.token_array[*index].token_type != TOK_EOF && tokens.token_array[*index].token_type != TOK_KEYWORD_END && tokens.token_array[*index].token_type != TOK_KEYWORD_ELSE){
         ASTNode* statement = parse_statement(tokens,index);
-        append_ast_node(&block_pointer, statement);
+        if (statement != NULL){
+            append_ast_node(&block_pointer, statement);
+        }
     }
     return block_pointer;
 }

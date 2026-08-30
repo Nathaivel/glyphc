@@ -104,11 +104,31 @@ void semantic_declaration_analysis(ASTNode*  declaration,Scope* scope){
     add_symbol_to_table(&scope->table, symbol->name, symbol);
 }
 
+void semantic_if_statement_analysis(ASTNode* statement,Scope* scope){
+    ASTNode* condition = statement->node.if_statement.expression;
+
+
+    if (condition == NULL){
+        fprintf(stdout,"NO condition found quitting...");
+        exit(1);
+    }
+
+    TypeKind condition_result = semantic_expression_analysis(condition,scope);
+
+    if (condition_result != TYPE_BOOL){
+        fprintf(stdout,"condition does not give boolean result quitting...\n");
+        exit(1);
+    }
+
+    semantic_tree_analysis(statement->node.if_statement.block,scope);
+
+    if (statement->node.if_statement.else_block != NULL) semantic_tree_analysis(statement->node.if_statement.else_block,scope);
+}
 
 void semantic_analysis_node(ASTNode* statement,Scope* scope){
     if(statement == NULL){
         fprintf(stdout,"error no statements\n");
-        exit(1);
+        return;
     }
 
     switch(statement->token_type){
@@ -119,14 +139,17 @@ void semantic_analysis_node(ASTNode* statement,Scope* scope){
         case (NODE_ASSIGNMENT):
             semantic_assignment_analysis(statement, scope);
             break;
+        case (NODE_IF):
+            semantic_if_statement_analysis(statement,scope);
+            break;
         default:
             break;
     }
 }
 
-ASTNode* semantic_analysis(ASTNode* tree){
+ASTNode* semantic_tree_analysis(ASTNode* tree,Scope* parent){
     Scope* scope = malloc(sizeof(Scope));
-    scope->parent = NULL;
+    scope->parent = parent;
     scope->table = init_symbol_table();
 
 
@@ -141,10 +164,15 @@ ASTNode* semantic_analysis(ASTNode* tree){
 
         for (int i = 0;i < tree->node.node_list.count;i++){
             ASTNode* statement = statements[i];
-            //printf("statement = %p\n",(void*)statement);
+            //printf("%d/%d - statement = %p\n",i,tree->node.node_list.count,(void*)statement);
             semantic_analysis_node(statement,scope);
         }
     }
 
+    return tree;
+}
+
+ASTNode* semantic_analysis(ASTNode* tree){
+    semantic_tree_analysis(tree, NULL);
     return tree;
 }
