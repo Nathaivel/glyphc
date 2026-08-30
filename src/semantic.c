@@ -1,4 +1,6 @@
 #include "semantic.h"
+#include "parser.h"
+#include "token.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -80,4 +82,110 @@ Symbol* get_symbol_from_table(SymbolHashMap* table,char* key){
     }
 
     return NULL;
+}
+
+TypeKind semantic_binary_op_analysis(TypeKind left,TypeKind right, Token operation){
+    if (left == TYPE_STRING || right == TYPE_STRING){
+        fprintf(stdout,"operation %*.s cannot be used on type string",(int)operation.size,operation.start);
+        exit(1);
+    }
+
+    if (left == TYPE_INT && right == TYPE_INT){
+        return TYPE_INT;
+    }
+    if ((left == TYPE_FLOAT && right == TYPE_FLOAT) || ((left == TYPE_INT && right == TYPE_FLOAT) || (left == TYPE_FLOAT && right == TYPE_INT))){
+        return TYPE_FLOAT;
+    }
+
+    return TYPE_VOID;
+}
+
+TypeKind lookup_identifier_type(ASTNode* expression, Scope* scope){
+    char* identifier_name =  token_value(expression->node.identifier);
+    Symbol* identifier = get_symbol_from_table(&scope->table,identifier_name);
+
+    if (identifier == NULL){
+        fprintf(stdout,"unkown identifier %s\n",identifier_name);
+        exit(1);
+    }
+
+    return identifier->type;
+}
+
+TypeKind semantic_expression_analysis(ASTNode *expression, Scope* scope){
+    if (expression->token_type == NODE_LITERAL){
+        return expression->type;
+    }
+
+    if (expression->token_type == NODE_IDENTIFIER){
+        return lookup_identifier_type(expression,scope);
+    }
+
+    if (expression->token_type == NODE_BINARY_OP){
+        TypeKind left = semantic_expression_analysis(expression->node.binary_op.left,scope);
+        TypeKind right = semantic_expression_analysis(expression->node.binary_op.right,scope);
+        return semantic_binary_op_analysis(left,right,expression->node.binary_op.operation);
+    }
+
+    return TYPE_VOID;
+}
+
+void semantic_declaration_analysis(ASTNode*  declaration,Scope* scope){
+    ASTNode* identifier = declaration->node.assignment.identifier;
+    char* identifier_name = token_value(identifier->node.identifier);
+    TypeKind declared_type = declaration->type;
+
+    Symbol* variable = get_symbol_from_table(&scope->table, token_value(identifier->node.identifier));
+
+    if (variable != NULL){
+        fprintf(stdout,"Variable redeclaration\n");
+        exit(1);
+    }
+
+    TypeKind derived_type = semantic_expression_analysis(declaration->node.assignment.expression,scope);
+
+    if (derived_type != declared_type){
+        fprintf(stdout,"declared type %s does not match the derived type %s\n",str_of_type(declared_type),str_of_type(derived_type));
+        exit(1);
+    }
+
+    Symbol* symbol = malloc(sizeof(Symbol));
+    symbol->name = identifier_name;
+    symbol->type = declared_type;
+
+    add_symbol_to_table(&scope->table, symbol->name, symbol);
+}
+
+ASTNode* semantic_analysis(ASTNode* tree){
+    Scope* scope = malloc(sizeof(Scope));
+    scope->parent = NULL;
+    scope->table = init_symbol_table();
+
+
+    /*
+    printf("tree = %p\n",(void*)tree);
+    printf("count = %d\n",tree->node.node_list.count);
+    printf("statements = %p\n",tree->node.node_list.statements);
+    */
+
+    if (tree->token_type == NODE_PROGRAM){
+        ASTNode** statements = tree->node.node_list.statements;
+
+        for (int i = 0;i < tree->node.node_list.count;i++){
+            ASTNode* statement = statements[i];
+            //printf("statement = %p\n",(void*)statement);
+
+            if(statement == NULL){
+                fprintf(stdout,"error no statements\n");
+                exit(1);
+            }
+
+            if (statement->token_type == NODE_DECLARATION){
+                semantic_declaration_analysis(statement, scope);
+
+            }
+        }
+    }
+
+    return tree;
 }

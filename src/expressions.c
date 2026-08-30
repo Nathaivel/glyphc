@@ -5,11 +5,26 @@
 #include <stdio.h>
 
 
-
+TypeKind get_literal_type(Token token){
+    switch (token.token_type){
+        case TOK_STRING:
+            return TYPE_STRING;
+            break;
+        case TOK_INTEGER:
+            return TYPE_INT;
+            break;
+        case TOK_FLOAT:
+            return TYPE_FLOAT;
+            break;
+        default:
+            return TYPE_VOID;
+    }
+}
 
 ASTNode* parse_literal(TokenArray tokens, int *index){
     ASTNode* new_node = malloc(sizeof(ASTNode));
     new_node->token_type = NODE_LITERAL;
+    new_node->type = get_literal_type(tokens.token_array[*index]);
     new_node->node.literal = tokens.token_array[*index];
     (*index)++;
     return new_node;

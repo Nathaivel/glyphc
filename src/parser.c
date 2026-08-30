@@ -314,7 +314,10 @@ ASTNode* parse(char *p, TokenArray tokens){
 
     while(tokens.token_array[i].token_type != TOK_EOF){
         ASTNode* statement = parse_statement(tokens,&i);
-        append_ast_node(&tree, statement);
+
+        if (statement != NULL){
+            append_ast_node(&tree, statement);
+        }
     }
     //printf("%d\n",i);
     print_statement(tree, 0);

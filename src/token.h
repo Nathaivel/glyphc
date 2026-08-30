@@ -105,5 +105,6 @@ char* token_type_str(TokenType token_type);
 void push(TokenArray *token_array,Token new_token);
 void array_init(TokenArray *token_array);
 void print_array(TokenArray *token_array);
+char* token_value(Token token);
 
 #endif

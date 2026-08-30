@@ -275,3 +275,12 @@ void push(TokenArray *array, Token new_token){
     (*array).token_array[array->count] = new_token;
     array->count += 1;
 }
+
+char* token_value(Token token){
+    char* value = malloc(token.size + 1);
+
+    memcpy(value,token.start, token.size);
+    value[token.size] = '\0';
+
+    return value;
+}

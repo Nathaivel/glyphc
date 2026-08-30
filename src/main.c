@@ -42,11 +42,7 @@ int main(int argc,char **argv){
     tokens.name = argv[argc - 1];
     ASTNode* ast = parse(p,tokens);
     SymbolHashMap table = init_symbol_table();
-    Symbol value_1 = {"hello",TYPE_STRING};
-    add_symbol_to_table(&table, "hello", &value_1);
-
-
-    printf("{key: %s,type: %s}\n",get_symbol_from_table(&table, "hello")->name,str_of_type(get_symbol_from_table(&table, "hello")->type));
+    ASTNode* validated_ast = semantic_analysis(ast);
 
 
 

@@ -23,6 +23,7 @@ typedef enum TypeKind{
     TYPE_INT,
     TYPE_FLOAT,
     TYPE_STRING,
+    TYPE_VOID,
     TYPE_NULL
 }TypeKind;
 
