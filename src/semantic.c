@@ -130,12 +130,31 @@ TypeKind semantic_expression_analysis(ASTNode *expression, Scope* scope){
     return TYPE_VOID;
 }
 
+void semantic_assignment_analysis(ASTNode* assignment,Scope* scope){
+    ASTNode* identifier = assignment->node.assignment.identifier;
+    char* identifier_name = token_value(identifier->node.identifier);
+
+    Symbol* variable = get_symbol_from_table(&scope->table, identifier_name);
+
+    if (variable == NULL){
+        fprintf(stdout,"Undeclared variable %s\nvariable is declared by variable_name: type = value\n",identifier_name);
+        exit(1);
+    }
+
+    TypeKind derived_type = semantic_expression_analysis(assignment->node.assignment.expression,scope);
+
+    if (variable->type != derived_type){
+        fprintf(stdout,"declared type %s does not match the derived type %s\n",str_of_type(variable->type),str_of_type(derived_type));
+        exit(1);
+    }
+}
+
 void semantic_declaration_analysis(ASTNode*  declaration,Scope* scope){
     ASTNode* identifier = declaration->node.assignment.identifier;
     char* identifier_name = token_value(identifier->node.identifier);
     TypeKind declared_type = declaration->type;
 
-    Symbol* variable = get_symbol_from_table(&scope->table, token_value(identifier->node.identifier));
+    Symbol* variable = get_symbol_from_table(&scope->table, identifier_name);
 
     if (variable != NULL){
         fprintf(stdout,"Variable redeclaration\n");
@@ -182,7 +201,10 @@ ASTNode* semantic_analysis(ASTNode* tree){
 
             if (statement->token_type == NODE_DECLARATION){
                 semantic_declaration_analysis(statement, scope);
+            }
 
+            if (statement->token_type == NODE_ASSIGNMENT){
+                semantic_assignment_analysis(statement, scope);
             }
         }
     }
