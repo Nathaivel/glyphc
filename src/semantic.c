@@ -34,8 +34,12 @@ TypeKind lookup_identifier_type(ASTNode* expression, Scope* scope){
     Symbol* identifier = get_symbol_from_table(&scope->table,identifier_name);
 
     if (identifier == NULL){
-        fprintf(stdout,"unkown identifier %s\n",identifier_name);
-        exit(1);
+        if (scope->parent != NULL){
+            return lookup_identifier_type(expression, scope->parent);
+        }else{
+            fprintf(stdout,"Unkown identifier %s\n",identifier_name);
+            exit(1);
+        }
     }
 
     return identifier->type;
@@ -63,17 +67,12 @@ void semantic_assignment_analysis(ASTNode* assignment,Scope* scope){
     ASTNode* identifier = assignment->node.assignment.identifier;
     char* identifier_name = token_value(identifier->node.identifier);
 
-    Symbol* variable = get_symbol_from_table(&scope->table, identifier_name);
 
-    if (variable == NULL){
-        fprintf(stdout,"Undeclared variable %s\nvariable is declared by variable_name: type = value\n",identifier_name);
-        exit(1);
-    }
-
+    TypeKind declared_type = lookup_identifier_type(identifier, scope);
     TypeKind derived_type = semantic_expression_analysis(assignment->node.assignment.expression,scope);
 
-    if (variable->type != derived_type){
-        fprintf(stdout,"declared type %s does not match the derived type %s\n",str_of_type(variable->type),str_of_type(derived_type));
+    if (declared_type != derived_type){
+        fprintf(stdout,"declared type %s does not match the derived type %s\n",str_of_type(declared_type),str_of_type(derived_type));
         exit(1);
     }
 }
