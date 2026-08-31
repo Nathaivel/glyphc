@@ -51,10 +51,12 @@ const char* get_line(char* source, int line,int *len){
 ASTNode* parse_function_call(TokenArray tokens,int *index){
     ASTNode* function_call = malloc(sizeof(ASTNode));
     function_call->token_type = NODE_FUNCTION_CALL;
+    function_call->source = &tokens.token_array[*index];
     function_call->node.function.identifier = parse_identifier(tokens, index);
 
     check_token_validity(tokens, index, TOK_LPARAN);
     ASTNode* parameters = program_init(NODE_PARAMETERS);
+    parameters->source = &tokens.token_array[*index];
     (*index)++;
 
     while (tokens.token_array[*index].token_type != TOK_RPARAN && tokens.token_array[*index].token_type != TOK_EOF){
@@ -133,33 +135,52 @@ ASTNode* create_number_node(char* number,size_t size){
 
     ASTNode* initial_node = malloc(sizeof(ASTNode));
     initial_node->token_type = NODE_LITERAL;
+
     initial_node->node.literal = initial;
 
     return initial_node;
 }
-void syntax_error(TokenArray tokens,int* index,char* expected,char* unexpected){
-    Token temp = tokens.token_array[*index];
+void syntax_error(Token token,
+    char* filename,
+    char* source,
+    char* error,
+    char* error_info){
 
     int line_len;
-    const char* line = get_line(tokens.source, temp.line, &line_len);
+    int line_margin_width = snprintf(NULL,0,"%zu",token.line);
+    const char* line = get_line(source, token.line, &line_len);
     fprintf(stdout,
-        "Error: unexpected token\n\n-->%s:%zu:%zu<-- \nexpected %s found %s\n\n |\n%zu|%.*s\n |%s\n",
-        tokens.name,
-        temp.line,
-        temp.column,
-        expected,
-        unexpected,
-        temp.line,
+        "%s\n\n-->%s:%zu:%zu<-- \n%s\n\n%*s|\n%zu|%.*s\n%*s|%s\n",
+        error,
+        filename,
+        token.line,
+        token.column,
+
+        error_info,
+
+        line_margin_width,
+        "",
+        token.line,
         line_len,
         line,
-        error_marker(temp.column, temp.size)
+        line_margin_width,
+        "",
+        error_marker(token.column, token.size)
     );
     exit(1);
 }
 
 void check_token_validity(TokenArray tokens, int *index,TokenType target_type){
     if (tokens.token_array[*index].token_type != target_type){
-        syntax_error(tokens,index, token_type_str(target_type), token_type_str(tokens.token_array[*index].token_type));
+        char* error = "Syntax error";
+        char error_msg[64];
+
+        snprintf(error_msg, sizeof(error_msg), "Expected %s found %s" ,token_type_str(target_type), token_type_str(tokens.token_array[*index].token_type));
+        syntax_error(tokens.token_array[*index],
+            tokens.name,
+            tokens.source,
+            error,
+            error_msg);
     }
 }
 
@@ -168,6 +189,7 @@ ASTNode* create_variable(TokenArray tokens,int *index){
 
     ASTNode* leaf = malloc(sizeof(ASTNode));
     leaf->token_type = NODE_IDENTIFIER;
+    leaf->source = &tokens.token_array[*index];
     leaf->node.identifier = tokens.token_array[*index];
 
 
@@ -181,6 +203,7 @@ ASTNode* create_variable(TokenArray tokens,int *index){
 
     if (temp.token_type == TOK_COLON){
         branch->token_type = NODE_DECLARATION;
+        branch->source = &tokens.token_array[*index];
 
         (*index)++;
         branch->type = token_to_type(tokens.token_array[*index].token_type);
@@ -188,6 +211,7 @@ ASTNode* create_variable(TokenArray tokens,int *index){
 
     }else{
         branch->token_type = NODE_ASSIGNMENT;
+        branch->source = &tokens.token_array[*index];
     }
 
     return branch;
@@ -240,6 +264,7 @@ void print_statement(ASTNode* program,int depth){
     if (program == NULL) return;
 
     for (int d = 0;d < depth;d++) printf("  ");
+    //printf("source: %s",token_value(*program->source));
 
     switch(program->token_type){
         case NODE_PROGRAM:
@@ -321,6 +346,7 @@ ASTNode* parse(char *p, TokenArray tokens){
     int i = 0;
     ASTNode* tree = malloc(sizeof(ASTNode));
     tree->token_type = NODE_PROGRAM;
+    tree->source = &tokens.token_array[i];
     tree->node.node_list.statements = NULL;
     tree->node.node_list.count = 0;
 

@@ -30,6 +30,7 @@ TypeKind get_literal_type(Token token){
 ASTNode* parse_literal(TokenArray tokens, int *index){
     ASTNode* new_node = malloc(sizeof(ASTNode));
     new_node->token_type = NODE_LITERAL;
+    new_node->source = &tokens.token_array[*index];
     new_node->type = get_literal_type(tokens.token_array[*index]);
     new_node->node.literal = tokens.token_array[*index];
     (*index)++;
@@ -39,6 +40,7 @@ ASTNode* parse_literal(TokenArray tokens, int *index){
 ASTNode* parse_identifier(TokenArray tokens, int *index){
     ASTNode* new_node = malloc(sizeof(ASTNode));
     new_node->token_type = NODE_IDENTIFIER;
+    new_node->source = &tokens.token_array[*index];
     new_node->node.identifier = tokens.token_array[*index];
     (*index)++;
     return new_node;
@@ -49,6 +51,7 @@ ASTNode* parse_identifier(TokenArray tokens, int *index){
 ASTNode* make_binary_op(ASTNode* left,ASTNode* right, Token operation){
     ASTNode* new_node = malloc(sizeof(ASTNode));
     new_node->token_type = NODE_BINARY_OP;
+
     new_node->node.binary_op.left = left;
     new_node->node.binary_op.right = right;
     new_node->node.binary_op.operation = operation;
@@ -71,7 +74,15 @@ ASTNode* parse_factors(TokenArray tokens,int *index){
         if (tokens.token_array[*index+1].token_type == TOK_LPARAN) return parse_function_call(tokens,index);
         return parse_identifier(tokens, index);
     }else{
-        syntax_error(tokens,index, "expression", token_type_str(temp.token_type));
+        char* error = "Syntax error";
+        char error_msg[64];
+
+        snprintf(error_msg, sizeof(error_msg), "Expected expression found %s", token_type_str(tokens.token_array[*index].token_type));
+        syntax_error(temp,
+            tokens.name,
+            tokens.source,
+            error,
+            error_msg);
         return NULL;
     }
 }
@@ -84,6 +95,7 @@ ASTNode* parse_terms(TokenArray tokens,int *index){
 
         ASTNode* right = parse_factors(tokens,index);
         ASTNode* new_node = make_binary_op(left, right,operator);
+        new_node->source = &tokens.token_array[*index];
 
         left = new_node;
     }
@@ -100,6 +112,7 @@ ASTNode* parse_expression(TokenArray tokens,int *index){
 
         ASTNode* right = parse_terms(tokens,index);
         ASTNode* new_node = make_binary_op(left, right,operator);
+        new_node->source = &tokens.token_array[*index];
 
         left = new_node;
     }
@@ -116,6 +129,7 @@ ASTNode* parse_comparision(TokenArray tokens,int *index){
 
         ASTNode* right = parse_expression(tokens,index);
         ASTNode* new_node = make_binary_op(left, right,operator);
+        new_node->source = &tokens.token_array[*index];
 
         left = new_node;
     }
@@ -132,6 +146,7 @@ ASTNode* parse_logic(TokenArray tokens,int *index){
 
         ASTNode* right = parse_comparision(tokens,index);
         ASTNode* new_node = make_binary_op(left, right,operator);
+        new_node->source = &tokens.token_array[*index];
 
         left = new_node;
     }

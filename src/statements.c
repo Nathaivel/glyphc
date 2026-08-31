@@ -30,9 +30,12 @@ void append_ast_node(ASTNode** program, ASTNode* statement){
 ASTNode* parse_for_statement(TokenArray tokens,int *index){
     ASTNode* for_statement = malloc(sizeof(ASTNode));
     for_statement->token_type = NODE_FOR;
+    for_statement->source = &tokens.token_array[*index];
 
     for_statement->node.for_statement.start = create_number_node("0", 1);
+    for_statement->node.for_statement.start->source = &tokens.token_array[*index];
     for_statement->node.for_statement.step = create_number_node("1", 1);
+    for_statement->node.for_statement.step->source = &tokens.token_array[*index];
 
     check_token_validity(tokens, index, TOK_IDENTIFIER);
 
@@ -40,19 +43,19 @@ ASTNode* parse_for_statement(TokenArray tokens,int *index){
     for_statement->node.for_statement.identifier = parse_identifier(tokens, index);
 
 
-    check_token_validity(tokens, index, TOK_NUMBER);
+    check_token_validity(tokens, index, TOK_INTEGER);
     for_statement->node.for_statement.stop = parse_literal(tokens, index);
 
     if (tokens.token_array[*index].token_type == TOK_KEYWORD_TO){
         (*index)++;
-        check_token_validity(tokens, index, TOK_NUMBER);
+        check_token_validity(tokens, index, TOK_INTEGER);
         for_statement->node.for_statement.start = for_statement->node.for_statement.stop;
         for_statement->node.for_statement.stop = parse_literal(tokens, index);
     }
 
     if (tokens.token_array[*index].token_type == TOK_KEYWORD_BY){
         (*index)++;
-        check_token_validity(tokens, index, TOK_NUMBER);
+        check_token_validity(tokens, index, TOK_INTEGER);
         for_statement->node.for_statement.step = parse_literal(tokens, index);
     }
 
@@ -61,6 +64,7 @@ ASTNode* parse_for_statement(TokenArray tokens,int *index){
     check_token_validity(tokens, index, TOK_KEYWORD_THEN);
 
     ASTNode* for_block = program_init(NODE_PROGRAM);
+    for_block->source = &tokens.token_array[*index];
     (*index)++;
     for_statement->node.for_statement.block = create_block(tokens, index, for_block);
 
@@ -77,6 +81,7 @@ ASTNode* parse_for_statement(TokenArray tokens,int *index){
 ASTNode* parse_while_statement(TokenArray tokens,int *index){
     ASTNode* while_statement = malloc(sizeof(ASTNode));
     while_statement->token_type = NODE_WHILE;
+    while_statement->source = &tokens.token_array[*index];
     while_statement->node.if_statement.else_block = NULL;
     create_conditional(tokens, index, while_statement);
 
@@ -86,6 +91,7 @@ ASTNode* parse_while_statement(TokenArray tokens,int *index){
     }
 
     ASTNode* while_block = program_init(NODE_PROGRAM);
+    while_block->source = &tokens.token_array[*index];
     (*index)++;
     while_statement->node.if_statement.block = create_block(tokens, index, while_block);
 
@@ -102,6 +108,7 @@ ASTNode* parse_while_statement(TokenArray tokens,int *index){
 ASTNode* parse_if_statement(TokenArray tokens,int *index){
     ASTNode* if_statement = malloc(sizeof(ASTNode));
     if_statement->token_type = NODE_IF;
+    if_statement->source = &tokens.token_array[*index];
     if_statement->node.if_statement.else_block = NULL;
 
     if_statement = create_conditional(tokens, index, if_statement);
@@ -111,6 +118,8 @@ ASTNode* parse_if_statement(TokenArray tokens,int *index){
 
 
     ASTNode* if_block = program_init(NODE_PROGRAM);
+    if_block->source = &tokens.token_array[*index];
+
     ASTNode* else_block = NULL;
 
     (*index)++;
@@ -119,6 +128,7 @@ ASTNode* parse_if_statement(TokenArray tokens,int *index){
     if (tokens.token_array[*index].token_type == TOK_KEYWORD_ELSE){
         (*index)++;
         else_block = program_init(NODE_PROGRAM);
+        else_block->source = &tokens.token_array[*index];
         if_statement->node.if_statement.else_block = create_block(tokens, index, else_block);
     }
 
@@ -135,6 +145,7 @@ ASTNode* parse_if_statement(TokenArray tokens,int *index){
 ASTNode* parse_function(TokenArray tokens,int *index){
     ASTNode* function = malloc(sizeof(ASTNode));
     function->token_type = NODE_FUNCTION_DECLARATION;
+    function->source = &tokens.token_array[*index];
 
     check_token_validity(tokens,index, TOK_IDENTIFIER);
     function->node.function.identifier = parse_identifier(tokens, index);
@@ -143,6 +154,7 @@ ASTNode* parse_function(TokenArray tokens,int *index){
     (*index)++;
 
     ASTNode* parameters = program_init(NODE_PARAMETERS);
+    parameters->source = &tokens.token_array[*index];
 
     while (tokens.token_array[*index].token_type != TOK_RPARAN && tokens.token_array[*index].token_type != TOK_EOF){
          check_token_validity(tokens,index, TOK_IDENTIFIER);
@@ -160,6 +172,7 @@ ASTNode* parse_function(TokenArray tokens,int *index){
     function->node.function.parameters = parameters;
 
     ASTNode* function_block = program_init(NODE_PROGRAM);
+    function_block->source = &tokens.token_array[*index];
 
     check_token_validity(tokens,index, TOK_KEYWORD_THEN);
     (*index)++;
@@ -187,6 +200,7 @@ ASTNode* parse_statement(TokenArray tokens,int *index){
         (*index)++;
         ASTNode* return_statement = malloc(sizeof(ASTNode));
         return_statement->token_type = NODE_RETURN;
+        return_statement->source = &tokens.token_array[*index];
         return_statement->node.expression = parse_logic(tokens, index);
         return return_statement;
     }

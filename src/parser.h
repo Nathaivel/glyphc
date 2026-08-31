@@ -31,6 +31,7 @@ typedef enum TypeKind{
 
 typedef struct ASTNode ASTNode;
 struct ASTNode{
+    Token* source;
     NodeType token_type;
     TypeKind type;
 
@@ -82,7 +83,11 @@ ASTNode* create_conditional(TokenArray tokens,int *index,ASTNode* conditional_st
 ASTNode* create_block(TokenArray tokens, int *index,ASTNode* block_pointer);
 ASTNode* create_number_node(char* number,size_t size);
 ASTNode* create_variable(TokenArray tokens,int *index);
-void syntax_error(TokenArray tokens,int* index,char* expected,char* unexpected);
+void syntax_error(Token token,
+    char* filename,
+    char* source,
+    char* error,
+    char* error_info);
 void check_token_validity(TokenArray tokens, int *index,TokenType target_type);
 void print_statement(ASTNode* program,int depth);
 ASTNode* program_init(NodeType token_type);

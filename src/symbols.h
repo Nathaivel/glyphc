@@ -6,9 +6,19 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-typedef struct{
+typedef enum{
+    SYMBOL_VARIABLE,
+    SYMBOL_FUNCTION,
+    SYMBOL_PARAMETER,
+}SymbolKind;
+
+typedef struct Symbol{
     char* name;
     TypeKind type;
+    SymbolKind symbol_type;
+
+    struct Symbol** parameters;
+    int parameter_count;
 } Symbol;
 
 typedef struct {
@@ -27,6 +37,10 @@ typedef struct {
 typedef struct Scope{
     SymbolHashMap table;
     struct Scope* parent;
+
+    bool is_returnable;
+    bool has_return;
+    TypeKind return_type;
 }Scope;
 
 uint64_t hash_string(char* key,size_t length);
